@@ -2,6 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 import pandas as pd
 from TradingviewData import TradingViewData, Interval
+import os
 
 request = TradingViewData()
 
@@ -54,8 +55,8 @@ def create_bucket(bucket_name: str, region: str = "eu-west-1"):
         return False
 
 
-def upload_file(file_name: str, bucket_name: str):
-    s3.upload_file(file_name, bucket_name, file_name)
+def upload_file(file_name: str, bucket_name: str, year, month):
+    s3.upload_file(os.path.join("data_files", file_name), bucket_name, f"avalanche/{year}/{month}/{file_name}")
     print(f"Archivo {file_name} subido a {bucket_name}")
 
 
@@ -66,20 +67,31 @@ avax_data = request.get_hist(
     symbol="AVAXUSD",
     exchange="Binance",
     interval=Interval.daily,
-    n_bars=1461
+    n_bars=1461 # Subir número si queremos
 )
 
 avax_data["year"] = avax_data.index.year
+avax_data["month"] = avax_data.index.month
 
-for i in range(1, 6):
+os.makedirs("data_files", exist_ok=True)
+bucket_name = "bucketcryptoimat3a03"
+delete_bucket_if_exists(bucket_name)
+create_bucket(bucket_name=bucket_name, region="eu-south-2")
+folder_name = "data_files"
+for i in range(1,6):
     year = 2021 + i
-    bucket_name = f"avax{year}bigtech"
-    avax_year = avax_data[avax_data["year"] == year]
-    avax_year.drop(columns=["year"], inplace=True)
-    file_name = f"avax_{year}.csv"
-    avax_year.to_csv(file_name)
-
-    delete_bucket_if_exists(bucket_name)
-
-    create_bucket(bucket_name, region="eu-south-2")
-    upload_file(file_name=file_name, bucket_name=bucket_name)
+    for j in range(1, 13):
+        month = j
+        if month >= 10:
+            file_name = f"avax_{year}_{month}.csv"
+        else:
+            file_name = f"avax_{year}_0{month}.csv"
+        avax_year_month = avax_data[(avax_data["year"] == year) & (avax_data["month"] == month)]
+        avax_year_month.drop(columns=["year", "month"], inplace=True)
+        if avax_year_month.shape[0] > 0:
+            avax_year_month.to_csv(os.path.join(folder_name, file_name))
+            if month < 10:
+                month = f"0{month}"
+            else:
+                month = str(month)
+            upload_file(file_name = file_name, bucket_name=bucket_name, year = year, month = month)
