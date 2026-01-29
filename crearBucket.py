@@ -56,7 +56,7 @@ def create_bucket(bucket_name: str, region: str = "eu-west-1"):
 
 
 def upload_file(file_name: str, bucket_name: str, year, month):
-    s3.upload_file(os.path.join("data_files", file_name), bucket_name, f"avalanche/{year}/{month}/{file_name}")
+    s3.upload_file(os.path.join("data_files", file_name), bucket_name, f"crypto=avalanche/year={year}/month={month}/{file_name}")
     print(f"Archivo {file_name} subido a {bucket_name}")
 
 
