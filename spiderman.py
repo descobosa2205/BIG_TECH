@@ -18,10 +18,10 @@ def ensure_database(glue, database_name: str):
     """Crea la DB si no existe."""
     try:
         glue.get_database(Name=database_name)
-        print(f"ℹ️  Database ya existe: {database_name}")
+        print(f"Database ya existe: {database_name}")
     except glue.exceptions.EntityNotFoundException:
         glue.create_database(DatabaseInput={"Name": database_name})
-        print(f"✅ Database creada: {database_name}")
+        print(f"Database creada: {database_name}")
 
 
 def ensure_crawler(glue, crawler_name: str):
@@ -36,7 +36,7 @@ def ensure_crawler(glue, crawler_name: str):
         Description=f"Crawler para {S3_TARGET_PATH}",
         RecrawlPolicy={"RecrawlBehavior": "CRAWL_NEW_FOLDERS_ONLY"},  # ideal para /year=/month=
         SchemaChangePolicy={
-            "UpdateBehavior": "UPDATE_IN_DATABASE",
+            "UpdateBehavior": "LOG",
             "DeleteBehavior": "LOG",
         },
     )
