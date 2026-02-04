@@ -76,7 +76,7 @@ avax_data["year"] = avax_data.index.year
 avax_data["month"] = avax_data.index.month
 
 os.makedirs("data_files", exist_ok=True)
-bucket_name = "bucketcryptoimat3a03"
+bucket_name = "bronceimat3a03"
 delete_bucket_if_exists(bucket_name)
 create_bucket(bucket_name=bucket_name, region="eu-south-2")
 folder_name = "data_files"
