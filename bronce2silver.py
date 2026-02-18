@@ -3,6 +3,8 @@ from pyspark.sql.functions import col, trim, lower, to_date, when, to_timestamp,
 import boto3
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, TimestampType
 from botocore.exceptions import ClientError
+from awsglue.context import GlueContext
+from pyspark.context import SparkContext
 
 def delete_bucket_if_exists(bucket_name: str):
     try:
@@ -58,8 +60,15 @@ if __name__ == "__main__":
     spark = SparkSession.builder \
         .appName("BronceToPlata_Transformation") \
         .getOrCreate()
+    
+    glueContext = GlueContext(SparkContext.getOrCreate())
 
-    path_bronce = "s3://bronceimat3a03/"
+    dynamic_frame = glueContext.create_dynamic_frame.from_catalog(
+        database="trade_data_imat3a03",
+        table_name="bucketcryptoimat3a03"
+    )
+    df_plata = dynamic_frame.toDF()
+    
     path_plata = "s3://plataimat3a03/data"
     
     schema = StructType([
@@ -71,12 +80,9 @@ if __name__ == "__main__":
     StructField("close", DoubleType(), True),
     StructField("volume", DoubleType(), True)])
 
-    df_raw = spark.read.format("csv") \
-        .option("header", "True") \
-        .option("sep", ",") \
-        .schema(schema) \
-        .load(path_bronce)
+    for field in schema.fields:
+        df_plata = df_plata.withColumn(field.name, col(field.name).cast(field.dataType))
 
-    df_raw.write.mode("overwrite") \
+    df_plata.write.mode("overwrite") \
         .partitionBy("crypto", "year", "month") \
         .parquet(path_plata)
