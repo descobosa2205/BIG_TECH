@@ -14,7 +14,7 @@ twm = ThreadedWebsocketManager()
 twm.start()
 
 twm.start_kline_socket(
-    symbol='BTCUSDT',
+    symbol='AVAXUSD',
     interval=Client.KLINE_INTERVAL_1MINUTE,
     callback=handle_kline
 )

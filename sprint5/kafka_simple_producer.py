@@ -7,7 +7,7 @@ from kafka import KafkaProducer
 BOOTSTRAP_SERVERS="51.49.235.244:9092"
 USERNAME="kafka_client"
 PASSWORD="88b8a35dca1a04da57dc5f3e"
-TOPIC="imat3a_test"
+TOPIC="imat3a-AVAX"
 
 def main() -> None:
 
